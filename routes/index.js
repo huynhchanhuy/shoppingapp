@@ -26,9 +26,14 @@ router.get('/', function(req, res, next) {
 
 /* GET product listing. */
 router.get('/products', function(req, res, next) {
-    var select = {
-        'name': 1, 'price': 1, 'shortDescription': 1, 'img.main': 1, 'availability': 1
-    };
+    var select = {};
+
+    if (req.query._select) {
+        var arrSelect = req.query._select.split(',');
+        for (var i in arrSelect) {
+            select[arrSelect[i]] = 1;
+        }
+    }
 
     var find = {};
     if (req.query.availability) {
@@ -73,11 +78,16 @@ router.get('/products', function(req, res, next) {
 router.get('/products.:mode/:keyword', function(req, res, next) {
     if (req.params.mode.toLowerCase() == 'search' && req.params.keyword) {
         var products = Product;
-        var select = {
-            'name': 1, 'price': 1, 'shortDescription': 1, 'img.main': 1, 'availability': 1
-        };
+        var select = {};
         var orSet = [];
         var keyword = { $regex: new RegExp('.*' + req.params.keyword + '.*', 'i')};
+
+        if (req.query._select) {
+            var arrSelect = req.query._select.split(',');
+            for (var i in arrSelect) {
+                select[arrSelect[i]] = 1;
+            }
+        }
 
         if (req.query._qFields) {
             var qFields = req.query._qFields.split(',');
@@ -143,6 +153,13 @@ router.get('/products.:mode/:keyword', function(req, res, next) {
 
 /* GET product detail. */
 router.get('/products/:id', function(req, res, next) {
+    var select = {};
+    if (req.query._select) {
+        var arrSelect = req.query._select.split(',');
+        for (var i in arrSelect) {
+            select[arrSelect[i]] = 1;
+        }
+    }
     Product.findById(req.params.id, function (err, docs) {
         if (err) {
             console.log(err);
@@ -150,12 +167,11 @@ router.get('/products/:id', function(req, res, next) {
                 error: '404 Not Found'
             });
         }
+
         return res.status(200).send({
             data: docs
         });
-    }).select({
-        'name': 1, 'price': 1, 'longDescription': 1, 'img': 1, 'availability': 1
-    });
+    }).select(select);
 });
 
 // Add a item into cart.

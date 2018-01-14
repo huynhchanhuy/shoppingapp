@@ -20,8 +20,7 @@
     "morgan": "~1.9.0",
     "nodemailer": "^4.4.1",
     "nodemailer-express-handlebars": "^2.0.0",
-    "serve-favicon": "~2.4.5",
-    "swig-email-templates": "^5.0.1"
+    "serve-favicon": "~2.4.5"
   },
   "devDependencies": {
     "webpack": "^3.10.0"
