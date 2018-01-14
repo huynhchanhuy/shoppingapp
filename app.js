@@ -7,13 +7,15 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
+var ENV = require('./.env.json');
 
 var index = require('./routes/index');
 // var users = require('./routes/users');
 
 var app = express();
 
-var uri = 'mongodb://remote_user:Huy123456@ds153577.mlab.com:53577/shopping_app_db';
+var uri = 'mongodb://' + ENV.DB.USERNAME + ':' + ENV.DB.PASSWORD + '@' +
+    ENV.DB.HOST + ':'+ENV.DB.PORT + '/' + ENV.DB.NAME;
 mongoose.Promise = global.Promise;
 mongoose.connect(uri, {
   useMongoClient: true
@@ -31,13 +33,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
-  secret: 'my_secret_key',
-  resave: false,
-  saveUninitialized: false,
+  secret: ENV.SESSION.secret,
+  resave: ENV.SESSION.resave,
+  saveUninitialized: ENV.SESSION.saveUninitialized,
   store: new MongoStore({
     mongooseConnection: mongoose.connection
   }),
-  cookie: {maxAge: 180 * 60 * 1000} // 3 hours
+  cookie: {maxAge: ENV.SESSION.expiration * 1000} // 3 hours
 }));
 
 app.use(function (req, res, next) {

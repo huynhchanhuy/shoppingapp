@@ -3,6 +3,7 @@ var express = require('express');
 var router = express.Router();
 var Product = require('../models/product');
 var Cart = require('../models/cart');
+var nodemailer = require('nodemailer');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -112,14 +113,16 @@ router.get('/products.:mode/:keyword', function(req, res, next) {
             });
         });
     } else {
-       return res.status(404).send('404 Not Found');
+       return res.status(404).send({
+           'error': '404 Not Found'
+       });
     }
 });
 
 /* GET product detail. */
 router.get('/products/:id', function(req, res, next) {
     Product.findById(req.params.id, function (err, docs) {
-        res.send({
+        res.status(200).send({
             data: docs
         });
     }).select({
@@ -127,33 +130,123 @@ router.get('/products/:id', function(req, res, next) {
     });
 });
 
+// Add a item into cart.
 router.post('/cart/', function (req, res, next) {
     if (!req.body.productId) {
-        return res.status(400).send('product_id is required');
+        return res.status(400).send({
+            'error': 'product_id is required'
+        });
     }
 
     if (!(req.body.quantity && !isNaN(req.body.quantity) && req.body.quantity >= 0)) {
-        return res.status(400).send('quantity is required');
+        return res.status(400).send({
+            'error': 'quantity is required'
+        });
     }
     var productId = req.body.productId;
     var quantity = req.body.quantity;
     var cart = new Cart(req.session.cart ? req.session.cart : {});
 
-    Product.findById(productId, function (err, product) {
+    Product.findById(productId).select(
+        {name: 1, price: 1, availability:1, img: 1}
+    ).exec(function (err, product) {
         if (err) {
-            return res.status(404).send('404 Not Found');
+            return res.status(404).send({
+                'error': '404 Not Found'
+            });
         }
-        cart.add(product, product.id, quantity);
-        req.session.cart = cart;
-        console.log(req.session.cart);
-        res.status(201).send('Added a item successful.');
+        cart.add(product, product.id, quantity).then(
+            function(cart){
+                req.session.cart = cart;
+                console.log(req.session.cart);
+                res.status(201).send(cart);
+            },
+            function(error){
+                res.status(400).send(error);
+            }
+        );
     })
 });
 
+// Get all cart's items.
+router.get('/cart/', function (req, res, next) {
+    var cart = new Cart(req.session.cart ? req.session.cart : {});
+    res.status(200).send(cart);
+});
+
+// Modify a cart's item.
+router.put('/cart/:productId', function (req, res, next) {
+    if (!(req.body.quantity && !isNaN(req.body.quantity) && req.body.quantity >= 0)) {
+        return res.status(400).send({
+            'error': 'quantity is required'
+        });
+    }
+    if (!req.session.cart) {
+        return res.status(400).send({
+            'error': 'No cart data'
+        });
+    }
+    var productId = req.params.productId;
+    var quantity = req.body.quantity;
+    var cart = new Cart(req.session.cart);
+    cart.edit(productId, quantity).then(
+        function(cart){
+            req.session.cart = cart;
+            res.status(202).send(cart);
+        },
+        function(error){
+            res.status(400).send(error);
+        }
+    );
+});
+
+// Clear all cart's items.
 router.delete('/cart/', function (req, res, next) {
     console.log(req.session.cart);
     req.session.cart = null;
-    res.status(205).send('Clear entire cart items.');
+    res.status(204).send();
 });
+
+// Delete a cart's item.
+router.delete('/cart/:productId', function (req, res, next) {
+    var productId = req.params.productId;
+    if (!req.session.cart) {
+        return res.status(400).send({
+            'error': 'No cart data'
+        });
+    }
+    var cart = new Cart(req.session.cart);
+    cart.delete(productId).then(
+        function(cart){
+            req.session.cart = cart;
+            res.status(202).send(cart);
+        },
+        function(error){
+            res.status(400).send(error);
+        }
+    );
+});
+
+// router.post('/checkout', function (req, res, next) {
+//     if (!req.session.cart) {
+//         return res.status(400).send({
+//             'error': 'No cart data'
+//         });
+//     }
+//     var cart = req.session.cart;
+//     var name = req.body.name;
+//     var email = req.body.email;
+//     var address = req.body.address;
+//
+//     var transporter = nodemailer.createTransport({
+//         service: 'Gmail',
+//         auth: {
+//             user: 'smtp.huy@gmail.com', // Your email id
+//             pass: 'Huy123456' // Your password
+//         }
+//     });
+//
+//
+// });
 
 module.exports = router;
