@@ -10,6 +10,7 @@
     "connect-mongo": "^2.0.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
+    "email-templates": "^3.3.2",
     "express": "~4.15.5",
     "express-handlebars": "^3.0.0",
     "express-session": "^1.15.6",
@@ -17,7 +18,9 @@
     "mongoose": "^4.13.9",
     "morgan": "~1.9.0",
     "nodemailer": "^4.4.1",
-    "serve-favicon": "~2.4.5"
+    "nodemailer-express-handlebars": "^2.0.0",
+    "serve-favicon": "~2.4.5",
+    "swig-email-templates": "^5.0.1"
   },
   "devDependencies": {
     "webpack": "^3.10.0"

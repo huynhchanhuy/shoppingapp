@@ -4,6 +4,9 @@ var router = express.Router();
 var Product = require('../models/product');
 var Cart = require('../models/cart');
 var nodemailer = require('nodemailer');
+var EmailTemplate = require('email-templates');
+var hbs = require('nodemailer-express-handlebars');
+var ENV = require('../.env.json');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -113,9 +116,9 @@ router.get('/products.:mode/:keyword', function(req, res, next) {
             });
         });
     } else {
-       return res.status(404).send({
-           'error': '404 Not Found'
-       });
+        return res.status(404).send({
+            'error': '404 Not Found'
+        });
     }
 });
 
@@ -227,26 +230,41 @@ router.delete('/cart/:productId', function (req, res, next) {
     );
 });
 
-// router.post('/checkout', function (req, res, next) {
-//     if (!req.session.cart) {
-//         return res.status(400).send({
-//             'error': 'No cart data'
-//         });
-//     }
-//     var cart = req.session.cart;
-//     var name = req.body.name;
-//     var email = req.body.email;
-//     var address = req.body.address;
-//
-//     var transporter = nodemailer.createTransport({
-//         service: 'Gmail',
-//         auth: {
-//             user: 'smtp.huy@gmail.com', // Your email id
-//             pass: 'Huy123456' // Your password
-//         }
-//     });
-//
-//
-// });
+router.post('/checkout', function (req, res, next) {
+    if (!req.session.cart) {
+        return res.status(400).send({
+            'error': 'No cart data'
+        });
+    }
+    var cart = req.session.cart;
+    var name = req.body.name;
+    var toEmail = req.body.email;
+    var address = req.body.address;
+
+    var transporter = nodemailer.createTransport(ENV.EMAIL);
+    transporter.use('compile', hbs({
+        viewPath: 'views/emails',
+        extName: '.hbs'
+    }));
+    transporter.sendMail({
+        from:  ENV.EMAIL.auth.user,
+        to: toEmail,
+        subject: 'Thank you for your order.',
+        template: 'order-confirmation',
+        context: {
+            name: name,
+            address: address,
+            email: toEmail,
+            totalPrice: cart.totalPrice,
+            items: cart.items,
+            orderCode: '12345'
+        }
+    }, function (err, response) {
+        if (err) {
+            res.status(400).send(err);
+        }
+        res.status(200).send(response);
+    });
+});
 
 module.exports = router;
