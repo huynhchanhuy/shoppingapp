@@ -3,6 +3,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var router = express.Router();
 var ENV = require('../.env.json');
+var isEmpty = require('lodash/isEmpty');
 
 // Emailer
 var nodemailer = require('nodemailer');
@@ -50,13 +51,13 @@ router.get('/products', function(req, res, next) {
 
     products.exec(function (err, docs) {
         if (err) {
-            res.status(400).send(err);
+            return res.status(400).send(err);
         }
         Product.count(find, function(err, total) {
             if (err) {
-                res.status(400).send(err);
+                return res.status(400).send(err);
             }
-            res.send({
+            return res.send({
                 data: docs || [],
                 meta: {
                     total: total,
@@ -115,13 +116,13 @@ router.get('/products.:mode/:keyword', function(req, res, next) {
 
         products.exec(function (err, docs) {
             if (err) {
-                res.status(400).send(err);
+                return res.status(400).send(err);
             }
             Product.count(find).and([
                 {$or: orSet}
             ]).exec(function(err, total) {
                 if (err) {
-                    res.status(400).send(err);
+                    return res.status(400).send(err);
                 }
                 res.status(200).send({
                     data: docs || [],
@@ -144,9 +145,12 @@ router.get('/products.:mode/:keyword', function(req, res, next) {
 router.get('/products/:id', function(req, res, next) {
     Product.findById(req.params.id, function (err, docs) {
         if (err) {
-            res.status(400).send(err);
+            console.log(err);
+            return res.status(400).send({
+                error: '404 Not Found'
+            });
         }
-        res.status(200).send({
+        return res.status(200).send({
             data: docs
         });
     }).select({
@@ -183,10 +187,10 @@ router.post('/cart/', function (req, res, next) {
             function(cart){
                 req.session.cart = cart;
                 console.log(req.session.cart);
-                res.status(201).send(cart);
+                return res.status(201).send(cart);
             },
             function(error){
-                res.status(400).send(error);
+                return res.status(400).send(error);
             }
         );
     })
@@ -195,7 +199,7 @@ router.post('/cart/', function (req, res, next) {
 // Get all cart's items.
 router.get('/cart/', function (req, res, next) {
     var cart = new Cart(req.session.cart ? req.session.cart : {});
-    res.status(200).send(cart);
+    return res.status(200).send(cart);
 });
 
 // Modify a cart's item.
@@ -205,7 +209,7 @@ router.put('/cart/:productId', function (req, res, next) {
             'error': 'quantity is required'
         });
     }
-    if (!req.session.cart) {
+    if (isEmpty(req.session.cart) || isEmpty(req.session.cart.items)) {
         return res.status(400).send({
             'error': 'No cart data'
         });
@@ -216,10 +220,10 @@ router.put('/cart/:productId', function (req, res, next) {
     cart.edit(productId, quantity).then(
         function(cart){
             req.session.cart = cart;
-            res.status(202).send(cart);
+            return res.status(202).send(cart);
         },
         function(error){
-            res.status(400).send(error);
+            return res.status(400).send(error);
         }
     );
 });
@@ -234,7 +238,7 @@ router.delete('/cart/', function (req, res, next) {
 // Delete a cart's item.
 router.delete('/cart/:productId', function (req, res, next) {
     var productId = req.params.productId;
-    if (!req.session.cart) {
+    if (isEmpty(req.session.cart) || isEmpty(req.session.cart.items)) {
         return res.status(400).send({
             'error': 'No cart data'
         });
@@ -243,17 +247,17 @@ router.delete('/cart/:productId', function (req, res, next) {
     cart.delete(productId).then(
         function(cart){
             req.session.cart = cart;
-            res.status(202).send(cart);
+            return res.status(202).send(cart);
         },
         function(error){
-            res.status(400).send(error);
+            return res.status(400).send(error);
         }
     );
 });
 
 // Checkout
 router.post('/checkout', function (req, res, next) {
-    if (!req.session.cart) {
+    if (isEmpty(req.session.cart) || isEmpty(req.session.cart.items)) {
         return res.status(400).send({
             'error': 'No cart data'
         });
@@ -276,7 +280,7 @@ router.post('/checkout', function (req, res, next) {
         ]
     }).select({stockLevel: 1, availability: 1}).exec(function (err, products) {
         if (err) {
-            res.status(400).send(err);
+            return res.status(400).send(err);
         }
         cart.checkout(products).then(
             function(objProducts){
@@ -288,7 +292,7 @@ router.post('/checkout', function (req, res, next) {
                 });
                 order.save(function (err, result) {
                     if (err) {
-                        res.status(400).send(err);
+                        return res.status(400).send(err);
                     }
                     var bulkProduct = Product.collection.initializeUnorderedBulkOp();
                     for (var objProductId in objProducts) {
@@ -304,7 +308,7 @@ router.post('/checkout', function (req, res, next) {
 
                     bulkProduct.execute(function(err, result) {
                         if (err) {
-                            res.status(400).send(err);
+                            return res.status(400).send(err);
                         }
                         req.session.cart = null;
                         console.log('Send mail.');
@@ -328,16 +332,16 @@ router.post('/checkout', function (req, res, next) {
                             }
                         }, function (err, response) {
                             if (err) {
-                                res.status(400).send(err);
+                                return res.status(400).send(err);
                             }
-                            res.status(200).send(response);
+                            return res.status(200).send(response);
                         });
                     });
 
                 });
             },
             function(error){
-                res.status(400).send(error);
+                return res.status(400).send(error);
             }
         );
     });

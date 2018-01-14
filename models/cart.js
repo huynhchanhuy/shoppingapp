@@ -7,6 +7,7 @@
  * @param oldCart
  */
 var mongoose = require('mongoose');
+
 module.exports = function Cart(oldCart) {
     this.items = oldCart.items || {};
     this.totalQuantity = oldCart.totalQuantity || 0;
