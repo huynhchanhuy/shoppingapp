@@ -1,12 +1,18 @@
 // https://leflair-shopping-app.herokuapp.com/
 var express = require('express');
+var mongoose = require('mongoose');
 var router = express.Router();
-var Product = require('../models/product');
-var Cart = require('../models/cart');
+var ENV = require('../.env.json');
+
+// Emailer
 var nodemailer = require('nodemailer');
 var EmailTemplate = require('email-templates');
 var hbs = require('nodemailer-express-handlebars');
-var ENV = require('../.env.json');
+
+// Model
+var Product = require('../models/product');
+var Cart = require('../models/cart');
+var Order = require('../models/order');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -43,7 +49,13 @@ router.get('/products', function(req, res, next) {
     }
 
     products.exec(function (err, docs) {
+        if (err) {
+            res.status(400).send(err);
+        }
         Product.count(find, function(err, total) {
+            if (err) {
+                res.status(400).send(err);
+            }
             res.send({
                 data: docs || [],
                 meta: {
@@ -102,9 +114,15 @@ router.get('/products.:mode/:keyword', function(req, res, next) {
         }
 
         products.exec(function (err, docs) {
+            if (err) {
+                res.status(400).send(err);
+            }
             Product.count(find).and([
                 {$or: orSet}
             ]).exec(function(err, total) {
+                if (err) {
+                    res.status(400).send(err);
+                }
                 res.status(200).send({
                     data: docs || [],
                     meta: {
@@ -125,6 +143,9 @@ router.get('/products.:mode/:keyword', function(req, res, next) {
 /* GET product detail. */
 router.get('/products/:id', function(req, res, next) {
     Product.findById(req.params.id, function (err, docs) {
+        if (err) {
+            res.status(400).send(err);
+        }
         res.status(200).send({
             data: docs
         });
@@ -230,41 +251,97 @@ router.delete('/cart/:productId', function (req, res, next) {
     );
 });
 
+// Checkout
 router.post('/checkout', function (req, res, next) {
     if (!req.session.cart) {
         return res.status(400).send({
             'error': 'No cart data'
         });
     }
-    var cart = req.session.cart;
+
+    var cart = new Cart(req.session.cart);
     var name = req.body.name;
     var toEmail = req.body.email;
     var address = req.body.address;
 
-    var transporter = nodemailer.createTransport(ENV.EMAIL);
-    transporter.use('compile', hbs({
-        viewPath: 'views/emails',
-        extName: '.hbs'
-    }));
-    transporter.sendMail({
-        from:  ENV.EMAIL.auth.user,
-        to: toEmail,
-        subject: 'Thank you for your order.',
-        template: 'order-confirmation',
-        context: {
-            name: name,
-            address: address,
-            email: toEmail,
-            totalPrice: cart.totalPrice,
-            items: cart.items,
-            orderCode: '12345'
-        }
-    }, function (err, response) {
+    productIds = cart.getProductIds();
+    console.log(productIds);
+    Product.find({
+        $and : [
+            {
+                _id: {
+                    $in: productIds
+                }
+            }
+        ]
+    }).select({stockLevel: 1, availability: 1}).exec(function (err, products) {
         if (err) {
             res.status(400).send(err);
         }
-        res.status(200).send(response);
+        cart.checkout(products).then(
+            function(objProducts){
+                var order = new Order({
+                    name: name,
+                    email: toEmail,
+                    address: address,
+                    cart: cart
+                });
+                order.save(function (err, result) {
+                    if (err) {
+                        res.status(400).send(err);
+                    }
+                    var bulkProduct = Product.collection.initializeUnorderedBulkOp();
+                    for (var objProductId in objProducts) {
+                        bulkProduct.find({
+                            '_id': mongoose.Types.ObjectId(objProductId)
+                        }).update({
+                            $set: {
+                                availability: objProducts[objProductId].availability,
+                                stockLevel: objProducts[objProductId].stockLevel
+                            }
+                        });
+                    }
+
+                    bulkProduct.execute(function(err, result) {
+                        if (err) {
+                            res.status(400).send(err);
+                        }
+                        req.session.cart = null;
+                        console.log('Send mail.');
+                        var transporter = nodemailer.createTransport(ENV.EMAIL);
+                        transporter.use('compile', hbs({
+                            viewPath: 'views/emails',
+                            extName: '.hbs'
+                        }));
+                        transporter.sendMail({
+                            from:  ENV.EMAIL.auth.user,
+                            to: toEmail,
+                            subject: 'Thank you for your order.',
+                            template: 'order-confirmation',
+                            context: {
+                                name: name,
+                                address: address,
+                                email: toEmail,
+                                totalPrice: cart.totalPrice,
+                                items: cart.items,
+                                orderCode: result.id
+                            }
+                        }, function (err, response) {
+                            if (err) {
+                                res.status(400).send(err);
+                            }
+                            res.status(200).send(response);
+                        });
+                    });
+
+                });
+            },
+            function(error){
+                res.status(400).send(error);
+            }
+        );
     });
+
 });
 
 module.exports = router;

@@ -6,6 +6,7 @@
  * Cart handler
  * @param oldCart
  */
+var mongoose = require('mongoose');
 module.exports = function Cart(oldCart) {
     this.items = oldCart.items || {};
     this.totalQuantity = oldCart.totalQuantity || 0;
@@ -82,6 +83,45 @@ module.exports = function Cart(oldCart) {
             }
             resolve(self);
         });
+    };
+
+    this.checkout = function (products) {
+        var self = this;
+        return new Promise(function(resolve, reject){
+            var objProducts = {};
+            for (var productId in products) {
+                objProducts[products[productId]._id] = products[productId];
+            }
+            var storedItem;
+            var objErr = {}, isError = false;
+            for (var id in self.items) {
+                storedItem = self.items[id];
+                if (objProducts[id].availability === false || storedItem.quantity > objProducts[id].stockLevel) {
+                    objErr[id] = storedItem.item.name + ' is out of stock.';
+                    isError = true;
+                } else {
+                    objProducts[id].stockLevel -= storedItem.quantity;
+                    if (objProducts[id].stockLevel < 1) {
+                        objProducts[id].availability = false;
+                    }
+                }
+            }
+            if(isError) {
+                reject({
+                    'error': objErr
+                });
+            } else {
+                resolve(objProducts);
+            }
+        });
+    };
+
+    this.getProductIds = function () {
+        var productIds = [];
+        for (var id in this.items) {
+            productIds.push(id);
+        }
+        return productIds;
     };
 
     /**
