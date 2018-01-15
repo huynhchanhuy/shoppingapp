@@ -27,7 +27,7 @@ module.exports = function (req, res, next) {
     ).exec(function (err, product) {
         if (err) {
             return res.status(404).send({
-                'error': '404 Not Found'
+                'error': 'product_id is not found'
             });
         }
         cart.add(product, product.id, quantity).then(

@@ -3,10 +3,10 @@
  */
 
 if (process.env.NODE_ENV === 'test') {
-    console.log('Test Environement');
-    module.exports = require('./../.env.test.json');
+    console.info('Loading \"test.json\". Test environment has been started.');
+    module.exports = require('./../test.json');
 } else {
-    console.log('Dev Environement');
-    module.exports = require('./../.env.json');
+    console.info('Loading \"dev.json\". Dev environment has been started.');
+    module.exports = require('./../dev.json');
 }
 

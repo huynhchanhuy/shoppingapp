@@ -2,7 +2,7 @@
  * Created by Huy on 15/01/2018.
  */
 
-var env = require('../.env.json');
+var config = require('./../core/config');
 var mongoose = require('mongoose');
 var isEmpty = require('lodash/isEmpty');
 
@@ -30,7 +30,7 @@ module.exports = function (req, res, next) {
     var address = req.body.address;
 
     productIds = cart.getProductIds();
-    console.log(productIds);
+    // console.log(productIds);
     Product.find({
         $and : [
             {
@@ -72,14 +72,14 @@ module.exports = function (req, res, next) {
                             return res.status(400).send(err);
                         }
                         req.session.cart = null;
-                        console.log('Send mail.');
-                        var transporter = nodemailer.createTransport(env.EMAIL);
+                        console.info('Send mail.');
+                        var transporter = nodemailer.createTransport(config.EMAIL);
                         transporter.use('compile', hbs({
                             viewPath: 'views/emails',
                             extName: '.hbs'
                         }));
                         transporter.sendMail({
-                            from:  env.EMAIL.auth.user,
+                            from:  config.EMAIL.auth.user,
                             to: toEmail,
                             subject: 'Thank you for your order.',
                             template: 'order-confirmation',

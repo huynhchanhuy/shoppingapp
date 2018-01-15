@@ -21,7 +21,7 @@ module.exports = function (req, res, next) {
     var quantity = req.body.quantity;
     var cart = new Cart(req.session.cart);
     if (quantity === 0) {
-        console.log('Delete product ' + productId);
+        console.info('Delete product ' + productId);
         cart.delete(productId).then(
             function(cart){
                 req.session.cart = cart;
@@ -32,7 +32,7 @@ module.exports = function (req, res, next) {
             }
         );
     } else {
-        console.log('Edit product ' + productId);
+        console.info('Edit product ' + productId);
         cart.edit(productId, quantity).then(
             function(cart){
                 req.session.cart = cart;
