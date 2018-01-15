@@ -2,6 +2,7 @@
  * Created by Huy on 15/01/2018.
  */
 var Product = require('../../models/product');
+var isInteger = require('lodash/isInteger');
 
 /* GET product listing. */
 module.exports = function(req, res, next) {

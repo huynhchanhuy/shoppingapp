@@ -4,22 +4,12 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var session = require('express-session');
-var MongoStore = require('connect-mongo')(session);
-var ENV = require('./.env.json');
+var db = require('./core/db');
+var session = require('./core/session');
 
 var index = require('./routes/index');
-// var users = require('./routes/users');
 
 var app = express();
-
-var uri = 'mongodb://' + ENV.DB.USERNAME + ':' + ENV.DB.PASSWORD + '@' +
-    ENV.DB.HOST + ':'+ENV.DB.PORT + '/' + ENV.DB.NAME;
-mongoose.Promise = global.Promise;
-mongoose.connect(uri, {
-  useMongoClient: true
-});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -27,20 +17,15 @@ app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+if (process.env.NODE_ENV !== 'test') {
+  app.use(logger('dev'));
+}
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({
-  secret: ENV.SESSION.secret,
-  resave: ENV.SESSION.resave,
-  saveUninitialized: ENV.SESSION.saveUninitialized,
-  store: new MongoStore({
-    mongooseConnection: mongoose.connection
-  }),
-  cookie: {maxAge: ENV.SESSION.expiration * 1000} // 3 hours
-}));
+app.use(session);
 
 app.use(function (req, res, next) {
   res.locals.session = req.session;
@@ -48,7 +33,6 @@ app.use(function (req, res, next) {
 });
 
 app.use('/', index);
-// app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

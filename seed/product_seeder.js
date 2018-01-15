@@ -3,13 +3,7 @@
  */
 var Product = require('../models/product');
 
-var mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
-var uri = 'mongodb://remote_user:Huy123456@ds153577.mlab.com:53577/shopping_app_db';
-//var uri = 'mongodb://ds153577.mlab.com:53577/shopping_app_db';
-mongoose.connect(uri, {
-    useMongoClient: true
-});
+var db = require('./../core/db');
 
 var products = [
     new Product({
@@ -111,5 +105,5 @@ for (var i = 0; i < products.length; i++) {
 }
 
 function exit() {
-    mongoose.disconnect();
+    db.disconnect();
 }
