@@ -14,9 +14,9 @@ module.exports = function (req, res, next) {
         });
     }
 
-    if (!isInteger(req.body.quantity) || req.body.quantity < 0) {
+    if (!isInteger(req.body.quantity) || req.body.quantity <= 0) {
         return res.status(400).send({
-            'error': 'quantity is required'
+            'error': 'quantity is required and must be a positive integer number'
         });
     }
     var productId = req.body.productId;
