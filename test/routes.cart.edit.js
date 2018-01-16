@@ -70,18 +70,19 @@ describe('Cart (has items)', function() {
     /*
      * Test the /POST route
      */
-    describe('/GET cart', function() {
-        it('it should show items from cart successful', function (done) {
-            hasSessionTest.get('/cart')
-                // .send({productId: product.id, quantity: 1})
-                .expect(200)
+    describe('/PUT cart', function() {
+        var newQuantity = 2
+        it('it should EDIT items from cart successful', function (done) {
+            hasSessionTest.put('/cart/' + product.id)
+                .send({productId: product.id, quantity: newQuantity})
+                .expect(202)
                 .end(function (err, res) {
                     if (err) return done(err);
                     res.body.should.be.a('object');
                     res.body.items.should.be.a('object');
                     res.body.items.should.contain.keys(product.id);
-                    res.body.totalQuantity.should.eql(quantity);
-                    res.body.totalPrice.should.eql(quantity * product.price);
+                    res.body.totalQuantity.should.eql(newQuantity);
+                    res.body.totalPrice.should.eql(newQuantity * product.price);
                     return done();
                 });
         });

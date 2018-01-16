@@ -26,7 +26,7 @@ beforeEach(function () {
 });
 
 //Our parent block
-describe('Cart Delete', function() {
+describe('Cart (has items)', function() {
     /**
      * Fake Product
      */
@@ -66,18 +66,25 @@ describe('Cart Delete', function() {
         });
     });
 
+
     /*
      * Test the /POST route
      */
-    describe('/DELETE cart', function() {
-        it('it should DELETE a item from cart successful', function (done) {
-            hasSessionTest.delete('/cart/' + product.id)
-            // .send({productId: product.id, quantity: 1})
-                .expect(202)
+    describe('/GET cart', function() {
+        it('it should GET items from cart successful', function (done) {
+            hasSessionTest.get('/cart')
+                // .send({productId: product.id, quantity: 1})
+                .expect(200)
                 .end(function (err, res) {
                     if (err) return done(err);
+                    res.body.should.be.a('object');
+                    res.body.items.should.be.a('object');
+                    res.body.items.should.contain.keys(product.id);
+                    res.body.totalQuantity.should.eql(quantity);
+                    res.body.totalPrice.should.eql(quantity * product.price);
                     return done();
                 });
         });
     });
+
 });
