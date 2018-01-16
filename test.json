@@ -17,6 +17,6 @@
     "secret": "my_secret_key",
     "resave": false,
     "saveUninitialized": false,
-    "expiration": 10800
+    "expiration": 60
   }
 }

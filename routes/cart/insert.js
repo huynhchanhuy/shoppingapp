@@ -4,6 +4,7 @@
 var Product = require('../../models/product');
 var Cart = require('../../models/cart');
 var isInteger = require('lodash/isInteger');
+var isEmpty = require('lodash/isEmpty');
 
 // Add a item into cart.
 module.exports = function (req, res, next) {
@@ -26,6 +27,9 @@ module.exports = function (req, res, next) {
         {name: 1, price: 1, availability:1, img: 1}
     ).exec(function (err, product) {
         if (err) {
+            res.status(400).send(err)
+        }
+        if (isEmpty(product)) {
             return res.status(404).send({
                 'error': 'product_id is not found'
             });
@@ -33,12 +37,12 @@ module.exports = function (req, res, next) {
         cart.add(product, product.id, quantity).then(
             function(cart){
                 req.session.cart = cart;
-                console.log(req.session.cart);
+                // console.log(req.session.cart);
                 return res.status(201).send(cart);
             },
             function(error){
                 return res.status(400).send(error);
             }
         );
-    })
+    });
 };

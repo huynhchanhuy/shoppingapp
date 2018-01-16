@@ -106,10 +106,9 @@ describe('Product', function() {
                 availability: true,
                 stockLevel: 10
             });
-            product.save(function (err, res) {
+            product.save(function (err, product) {
                 chai.request(server)
                     .get('/products/' + product.id + '?_select=name,img,longDescription,price,availability')
-                    .send(product)
                     .end(function (err, res) {
                         res.should.have.status(200);
                         res.body.should.be.a('object');
@@ -174,7 +173,6 @@ describe('Product', function() {
             Product.collection.insertMany(products, function (err, product) {
                 chai.request(server)
                     .get('/products.search/fanta?_qFields=name,shortDescription&_select=name,img.main,shortDescription,price,availability&availability=1')
-                    .send(product)
                     .end(function (err, res) {
                         res.should.have.status(200);
                         res.body.should.be.a('object');
@@ -225,7 +223,6 @@ describe('Product', function() {
             Product.collection.insertMany(products, function (err, product) {
                 chai.request(server)
                     .get('/products.search/description?_qFields=name,shortDescription&_select=name,img.main,shortDescription,price,availability&availability=1')
-                    .send(product)
                     .end(function (err, res) {
                         res.should.have.status(200);
                         res.body.should.be.a('object');
@@ -282,7 +279,6 @@ describe('Product', function() {
             Product.collection.insertMany(products, function (err, product) {
                 chai.request(server)
                     .get('/products.search/not_available?_qFields=name,shortDescription&_select=name,img.main,shortDescription,price,availability&availability=1')
-                    .send(product)
                     .end(function (err, res) {
                         res.should.have.status(200);
                         res.body.should.be.a('object');
@@ -328,7 +324,6 @@ describe('Product', function() {
             Product.collection.insertMany(products, function (err, product) {
                 chai.request(server)
                     .get('/products.search/not_available?_qFields=name,shortDescription&_select=name,img.main,shortDescription,price,availability&availability=1')
-                    .send(product)
                     .end(function (err, res) {
                         res.should.have.status(200);
                         res.body.should.be.a('object');
