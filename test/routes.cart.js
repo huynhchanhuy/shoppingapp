@@ -25,118 +25,89 @@ describe('Product', function() {
     /*
      * Test the /GET route
      */
-    describe('/GET products', function() {
-        it('it should GET all AVAILABLE products', function(done) {
-            var product = new Product({
-                name: 'Dutch Mill Strawberry',
-                img: {
-                    main: 'https://www.mondenissin.com/uploads/images/products/dutchMill_strawberry3.png',
-                    imgSet: [
-                        'https://www.waangoo.com/content/images/thumbs/0008398_dutch-mill-yogurt-drink-strawberry-juice_600.jpeg',
-                        'https://www.bayanmall.com/image/cache/data/7-26-13/IMG_7910-700x700_0.jpg'
-                    ]
-                },
-                shortDescription: 'Dutch Mill brings a yoghurt drink that contains the goodness of milk.',
-                longDescription: 'Dutch Mill brings a yoghurt drink that contains the goodness of milk, yoghurt, and real fruit juice. It has calcium from fresh cows’ milk and cultured yoghurt, fermented by Lactobacillus bulgaricus and Streptococcus thermophillus, which is ultra-heat treated under aseptic conditions. Dutch Mill is not only nutritious but is also made to be delicious with the different fruit juice flavors kids can choose from.',
-                price: 1,
-                availability: true,
-                stockLevel: 10
-            });
-            product.save(function (err, res) {
-                chai.request(server)
-                    .get('/products?_select=name,price,shortDescription,availability,img.main&availability=true')
-                    .end(function (err, res) {
-                        res.should.have.status(200);
-                        res.body.should.be.a('object');
-                        res.body.should.have.property('data');
-                        res.body.data.should.be.a('array');
-                        res.body.data[0].should.have.property('_id').eql(product.id);
-                        res.body.data[0].should.have.property('name');
-                        res.body.data[0].should.have.property('img');
-                        res.body.data[0].img.should.have.property('main');
-                        res.body.data[0].img.should.not.have.property('imgSet');
-                        res.body.data[0].should.have.property('shortDescription');
-                        res.body.data[0].should.have.property('price');
-                        res.body.data[0].should.have.property('availability');
-                        res.body.data[0].should.not.have.property('longDescription');
-                        res.body.data[0].should.not.have.property('stockLevel');
-                        res.body.should.have.property('meta');
-                        res.body.meta.should.be.a('object');
-                        res.body.meta.should.have.property('total').eql(1);
-                        res.body.meta.should.have.property('skip').eql(null);
-                        res.body.meta.should.have.property('limit').eql(null);
-                        done();
-                    });
-            });
-        });
-
-        it('it should GET all the products with params: _limit, _skip', function(done) {
-            chai.request(server)
-                .get('/products?_limit=1&_skip=1&_select=name,price,shortDescription,availability,img.main&availability=true')
-                .end(function(err, res) {
-                    res.should.have.status(200);
-                    res.body.should.be.a('object');
-                    res.body.should.have.property('data').eql([]);
-                    res.body.should.have.property('meta');
-                    res.body.meta.should.have.property('total').eql(0);
-                    res.body.meta.should.have.property('skip').eql(1);
-                    res.body.meta.should.have.property('limit').eql(1);
-                    done();
-                });
-        });
-    });
-
-    /*
-     * Test the /GET/:id route
-     */
-    describe('/GET/:id products', function() {
-        it('it should GET a product by the given id', function (done) {
-            var product = new Product({
-                name: 'Dutch Mill Strawberry',
-                img: {
-                    main: 'https://www.mondenissin.com/uploads/images/products/dutchMill_strawberry3.png',
-                    imgSet: [
-                        'https://www.waangoo.com/content/images/thumbs/0008398_dutch-mill-yogurt-drink-strawberry-juice_600.jpeg',
-                        'https://www.bayanmall.com/image/cache/data/7-26-13/IMG_7910-700x700_0.jpg'
-                    ]
-                },
-                shortDescription: 'Dutch Mill brings a yoghurt drink that contains the goodness of milk.',
-                longDescription: 'Dutch Mill brings a yoghurt drink that contains the goodness of milk, yoghurt, and real fruit juice. It has calcium from fresh cows’ milk and cultured yoghurt, fermented by Lactobacillus bulgaricus and Streptococcus thermophillus, which is ultra-heat treated under aseptic conditions. Dutch Mill is not only nutritious but is also made to be delicious with the different fruit juice flavors kids can choose from.',
-                price: 1,
-                availability: true,
-                stockLevel: 10
-            });
-            product.save(function (err, res) {
-                chai.request(server)
-                    .get('/products/' + product.id + '?_select=name,img,longDescription,price,availability')
-                    .send(product)
-                    .end(function (err, res) {
-                        res.should.have.status(200);
-                        res.body.should.be.a('object');
-                        res.body.should.have.property('name');
-                        res.body.should.have.property('img');
-                        res.body.img.should.have.property('main');
-                        res.body.img.should.have.property('imgSet');
-                        res.body.should.have.property('longDescription');
-                        res.body.should.have.property('price');
-                        res.body.should.have.property('availability');
-                        res.body.should.not.have.property('shortDescription');
-                        res.body.should.not.have.property('stockLevel');
-                        res.body.should.have.property('_id').eql(product.id);
-                        done();
-                    });
-            })
-        });
-
-        it('it should NOT GET a product because of wrong given id', function (done) {
-            chai.request(server)
-                .get('/products/123456')
-                .end(function (err, res) {
-                    res.should.have.status(404);
-                    done();
-                });
-        });
-    });
+    // describe('/GET products', function() {
+    //     it('it should GET all the products', function(done) {
+    //         chai.request(server)
+    //             .get('/products')
+    //             .end(function(err, res) {
+    //                 res.should.have.status(200);
+    //                 res.body.should.be.a('object');
+    //                 res.body.should.have.property('data').eql([]);
+    //                 res.body.should.have.property('meta');
+    //                 res.body.meta.should.have.property('total').eql(0);
+    //                 res.body.meta.should.have.property('skip').eql(null);
+    //                 res.body.meta.should.have.property('limit').eql(null);
+    //                 done();
+    //             });
+    //     });
+    //
+    //     it('it should GET all the products with params: _limit, _skip', function(done) {
+    //         chai.request(server)
+    //             .get('/products?_limit=1&_skip=1')
+    //             .end(function(err, res) {
+    //                 res.should.have.status(200);
+    //                 res.body.should.be.a('object');
+    //                 res.body.should.have.property('data').eql([]);
+    //                 res.body.should.have.property('meta');
+    //                 res.body.meta.should.have.property('total').eql(0);
+    //                 res.body.meta.should.have.property('skip').eql(1);
+    //                 res.body.meta.should.have.property('limit').eql(1);
+    //                 done();
+    //             });
+    //     });
+    // });
+    //
+    // /*
+    //  * Test the /GET/:id route
+    //  */
+    // describe('/GET/:id products', function() {
+    //     it('it should GET a product by the given id', function (done) {
+    //         var product = new Product({
+    //             name: 'Dutch Mill Strawberry',
+    //             img: {
+    //                 main: 'https://www.mondenissin.com/uploads/images/products/dutchMill_strawberry3.png',
+    //                 imgSet: [
+    //                     'https://www.waangoo.com/content/images/thumbs/0008398_dutch-mill-yogurt-drink-strawberry-juice_600.jpeg',
+    //                     'https://www.bayanmall.com/image/cache/data/7-26-13/IMG_7910-700x700_0.jpg'
+    //                 ]
+    //             },
+    //             shortDescription: 'Dutch Mill brings a yoghurt drink that contains the goodness of milk.',
+    //             longDescription: 'Dutch Mill brings a yoghurt drink that contains the goodness of milk, yoghurt, and real fruit juice. It has calcium from fresh cows’ milk and cultured yoghurt, fermented by Lactobacillus bulgaricus and Streptococcus thermophillus, which is ultra-heat treated under aseptic conditions. Dutch Mill is not only nutritious but is also made to be delicious with the different fruit juice flavors kids can choose from.',
+    //             price: 1,
+    //             availability: true,
+    //             stockLevel: 10
+    //         });
+    //         product.save(function (err, product) {
+    //             chai.request(server)
+    //                 .get('/products/' + product.id + '?_select=name,img,longDescription,price,availability')
+    //                 .send(product)
+    //                 .end(function (err, res) {
+    //                     res.should.have.status(200);
+    //                     res.body.should.be.a('object');
+    //                     res.body.should.have.property('name');
+    //                     res.body.should.have.property('img');
+    //                     res.body.img.should.have.property('main');
+    //                     res.body.img.should.have.property('imgSet');
+    //                     res.body.should.have.property('longDescription');
+    //                     res.body.should.have.property('price');
+    //                     res.body.should.have.property('availability');
+    //                     res.body.should.not.have.property('shortDescription');
+    //                     res.body.should.not.have.property('stockLevel');
+    //                     res.body.should.have.property('_id').eql(product.id);
+    //                     done();
+    //                 });
+    //         })
+    //     });
+    //
+    //     it('it should NOT GET a product because of wrong given id', function (done) {
+    //         chai.request(server)
+    //             .get('/products/123456')
+    //             .end(function (err, res) {
+    //                 res.should.have.status(404);
+    //                 done();
+    //             });
+    //     });
+    // });
 
     /*
      * Test the /GET/products.search route
@@ -233,18 +204,12 @@ describe('Product', function() {
                         res.body.data[0].should.have.property('name').eql('Fanta');
                         res.body.data[0].should.have.property('img');
                         res.body.data[0].img.should.have.property('main');
-                        res.body.data[0].img.should.not.have.property('imgSet');
                         res.body.data[0].should.have.property('shortDescription');
                         res.body.data[0].should.have.property('price');
                         res.body.data[0].should.have.property('availability');
                         res.body.data[0].should.not.have.property('longDescription');
                         res.body.data[0].should.not.have.property('stockLevel');
-
-                        res.body.should.have.property('meta');
-                        res.body.meta.should.be.a('object');
-                        res.body.meta.should.have.property('total').eql(1);
-                        res.body.meta.should.have.property('skip').eql(null);
-                        res.body.meta.should.have.property('limit').eql(null);
+                        res.body.data[0].img.should.not.have.property('imgSet');
                         done();
                     });
             })
@@ -287,7 +252,6 @@ describe('Product', function() {
                         res.should.have.status(200);
                         res.body.should.be.a('object');
                         res.body.data.should.be.a('array').eql([]);
-                        res.body.meta.should.be.a('object');
                         res.body.meta.should.have.property('total').eql(0);
                         res.body.meta.should.have.property('skip').eql(null);
                         res.body.meta.should.have.property('limit').eql(null);
