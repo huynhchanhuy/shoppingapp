@@ -5,6 +5,14 @@ This app is designed to assess my skills as a back-end NodeJS developer.
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+
+### API References
+* I did include **ShoppingApp.postman_collection.json** file in the source code. You just need to import this file to Postman to get **endpoint list**.
+* Here is [API Documentation](https://shoppingapp2.docs.apiary.io/). You can run it on-the-fly.
+
+### API Gateway Server for Deployment.
+* On [Heroku App](https://leflair-shopping-app.herokuapp.com/).
+
 ### Prerequisites
 * [ExpressJS](https://github.com/expressjs/express/):  is fast and simple framework for Node for handling RESTFul API request with the better performance. Provided a lot of libraries and helpers that easy to use.
 
@@ -20,9 +28,6 @@ These instructions will get you a copy of the project up and running on your loc
 
 * [Heroku](https://www.heroku.com/): a Cloud Application Platform, I use it for deploy my project. Reason is simple, it has a free plan for study and testing. Fast and easy to deploy to the cloud.
 
-### API Reference
-* I did include **ShoppingApp.postman_collection.json** file in the source code. You just need to import this file to Postman to get **endpoint list**.
-* Here is [API Documentation](https://shoppingapp2.docs.apiary.io/).
 ### Directory Structure
     
 ```
@@ -119,9 +124,9 @@ https://localhost:3000
 ```
 
 #### Heroku
-I did setup the demo on Heroku
+I did setup the demo on Heroku.
 ```
-https://huyhuynh-nodejs.herokuapp.com/
+https://leflair-shopping-app.herokuapp.com/
 ```
 
 #### MongoDB Server
