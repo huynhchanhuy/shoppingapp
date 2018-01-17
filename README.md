@@ -71,7 +71,7 @@ package.json
  * You can:
     * View product list:
         * use param *_select* to select exactly field name that matched with the list you given. For example: *_select=name,price,shortDescription,availability,img.main*
-        * use param *_limit* to limit the results to be returned.
+        * use param *_limit* to limit a certain number of results to be returned.
         * use param *_skip* that return a certain number of results after a certain number of documents.
         * use param *availability* (true or false) to return any records that available to be added to cart. 
     * Search products by giving keyword and setting your fields you want to query on. You can use the same params that given in *View List Product*.
