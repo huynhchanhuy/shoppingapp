@@ -30,6 +30,10 @@ module.exports = function(req, res, next) {
                     'shortDescription': keyword
                 });
             }
+        } else {
+            orSet.push({
+                'name': keyword
+            });
         }
 
         var find = {};
