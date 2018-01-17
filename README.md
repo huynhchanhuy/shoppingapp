@@ -7,7 +7,8 @@ This app is designed to assess my skills as a back-end NodeJS developer.
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### API References
-* I did include **ShoppingApp.postman_collection.json** file in the source code. You just need to import this file to Postman to get **endpoint list**.
+* I did include **ShoppingApp.postman_collection.json** file in the source code. You just need to import this file to Postman to get **endpoint list**. Or you can click to this [export link](https://www.getpostman.com/collections/76f6f28e8691af667084) to get the API Collection.
+
 * Here is [API Documentation](https://shoppingapp2.docs.apiary.io/). You can run it on-the-fly.
 
 ### API Gateway Server for Deployment.
