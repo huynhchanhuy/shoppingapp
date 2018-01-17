@@ -21,7 +21,8 @@ These instructions will get you a copy of the project up and running on your loc
 * [Heroku](https://www.heroku.com/): a Cloud Application Platform, I use it for deploy my project. Reason is simple, it has a free plan for study and testing. Fast and easy to deploy to the cloud.
 
 ### API Reference
-I did include **ShoppingApp.postman_collection.json** file in the source code. You just need to import this file to Postman to get **endpoint list**.
+* I did include **ShoppingApp.postman_collection.json** file in the source code. You just need to import this file to Postman to get **endpoint list**.
+* Here is [API Documentation](https://shoppingapp2.docs.apiary.io/).
 ### Directory Structure
     
 ```
