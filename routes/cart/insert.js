@@ -10,7 +10,7 @@ var isEmpty = require('lodash/isEmpty');
 module.exports = function (req, res, next) {
     if (!req.body.productId) {
         return res.status(400).send({
-            'error': 'product_id is required'
+            'error': 'productId is required'
         });
     }
 
