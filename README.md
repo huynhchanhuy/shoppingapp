@@ -61,6 +61,31 @@ test.json
 package.json
 ```
 
+### Features
+#### API
+```
+<host_name>/resource_name/<id_or_keyword>?param1=value1
+```
+#### Product
+ * You can can see product schema inside folder *models/product.js* .
+ * You can:
+    * View product list:
+        * use param *_select* to select exactly field name that matched with the list you given. For example: *_select=name,price,shortDescription,availability,img.main*
+        * use param *_limit* to limit the results to be returned.
+        * use param *_skip* that return a certain number of results after a certain number of documents.
+        * use param *availability* (true or false) to return any records that available to be added to cart. 
+    * Search products by giving keyword and setting your fields you want to query on. You can use the same params that given in *View List Product*.
+    * View detail product by giving the *product_id*. You can use the same params (except availability, *_limit* and *_skip*) that stated above.
+#### Cart
+ * I use session to stored the cart. That session will be stored in MongoDB and it has the expired time is 3 hours.
+ * You can:
+    * Add to cart.
+    * Remove a product from the cart.
+    * Remove all products from the cart.
+    * Edit the quantity of a item inside the cart.
+#### Checkout
+ * Checkout the cart and remove all items inside the cart. Make an order and send a email.
+
 ### Installing
 
 Install NodeJs and NPM
